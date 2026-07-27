@@ -1,10 +1,10 @@
-﻿using ECommerce.Api.Data;
+﻿using AutoMapper;
+using ECommerce.Api.Data;
 using ECommerce.Api.DTOs;
 using ECommerce.Api.Models;
-using Microsoft.AspNetCore.Http;
+using ECommerce.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 
 //https://localhost:44363/swagger/index.html
 
@@ -15,11 +15,11 @@ namespace ECommerce.Api.Controllers
     public class ProductsController : ControllerBase
     {
 
-        private readonly AppDbContext _context;
+        private readonly IProductService _productService;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(IProductService productService)
         {
-            _context = context;
+            _productService = productService;
         }
 
 
@@ -27,17 +27,8 @@ namespace ECommerce.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
-            var products = await _context.Products.ToListAsync();
-            var result = products.Select(p => new ProductDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                Stock = p.Stock
-            });
-            
-            return Ok(result);
+            var products = await _productService.GetAllProductsAsync();
+            return Ok(products);
         }
 
 
@@ -46,48 +37,23 @@ namespace ECommerce.Api.Controllers
         public  async Task<IActionResult> GetProductById(int id)
         {
 
-            var product = await _context.Products.FindAsync(id);
+            var product = await _productService.GetProductByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
-            var result = new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Stock = product.Stock
-            };
-            return Ok(result);
+            return Ok(product);
         }
 
 
         [HttpPost]
         public  async Task<IActionResult> CreateProduct(CreateProductDto dto)
         {
-            var product = new Product
-            {
-                Name = dto.Name,
-                Description = dto.Description,
-                Price = dto.Price,
-                Stock = dto.Stock
-            };
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            var result = new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Stock = product.Stock
-            };
+            var product =   await _productService.CreateProductAsync(dto);
             return CreatedAtAction(
                     nameof(GetProductById),
                     new { id = product.Id },
-                    result);
+                    product);
         }
 
 
@@ -96,27 +62,12 @@ namespace ECommerce.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(int id, CreateProductDto dto)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _productService.UpdateProductAsync(id, dto);
             if(product == null)
             {
                 return NotFound();
             }
-
-            product.Name = dto.Name;
-            product.Description = dto.Description;
-            product.Price = dto.Price;
-            product.Stock = dto.Stock;
-
-            var result = new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Stock = product.Stock
-            };
-            await _context.SaveChangesAsync();
-            return Ok(result);
+            return Ok(product);
         }
 
 
@@ -125,16 +76,13 @@ namespace ECommerce.Api.Controllers
         public async Task<IActionResult> DeleteProduct(int id)
         {
 
-            var product = await _context.Products.FindAsync(id);
-            if(product == null)
+            var deleted = await _productService.DeleteProductAsync(id);
+            if(!deleted)
             {
                 return NotFound();
             }
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
             return NoContent();
         }
-
 
 
     }
