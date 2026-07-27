@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using ECommerce.Api.Mappings;
 using ECommerce.Api.Services.Interfaces;
 using ECommerce.Api.Services;
+using ECommerce.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddAutoMapper(typeof(ProductProfile));
 builder.Services.AddScoped<IProductService, ProductService>();
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
