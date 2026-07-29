@@ -4,6 +4,7 @@ using ECommerce.Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using ECommerce.Api.Models;
 using AutoMapper;
+using System.Linq;
 
 namespace ECommerce.Api.Services
 {
@@ -19,10 +20,36 @@ namespace ECommerce.Api.Services
             
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
+        public async Task<(IEnumerable<ProductDto> Data, int TotalCount)> GetAllProductsAsync(ProductQueryParameters query)
         {
-            var products = await _context.Products.ToListAsync();
-            return _mapper.Map<IEnumerable<ProductDto>>(products);
+            var productsQuery = _context.Products.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(query.Searsh))
+            {
+                productsQuery = productsQuery.Where(p => p.Name.Contains(query.Searsh));
+            }
+            if (query.MinPrice.HasValue)
+            {
+                productsQuery = productsQuery.Where(p => p.Price >= query.MinPrice.Value);
+            }
+            if (query.MaxPrice.HasValue)
+            {
+                productsQuery = productsQuery.Where(p => p.Price <= query.MaxPrice.Value);
+            }
+            var totalCount = await productsQuery.CountAsync();
+            productsQuery = query.SortBy?.ToLower() switch
+            {
+                "price" => query.Descending
+                ? productsQuery.OrderByDescending(p => p.Name)
+                : productsQuery.OrderBy(p => p.Name),
+                _ => productsQuery.OrderBy(p => p.Id)
+            };
+
+            var products = await productsQuery
+                .Skip((query.Page -1) * query.PageSise)
+                .Take(query.PageSise)
+                .ToListAsync();
+            var data = _mapper.Map<IEnumerable<ProductDto>>(products);
+            return (data, totalCount);
         }
 
         public async Task<ProductDto?> GetProductByIdAsync(int id)
