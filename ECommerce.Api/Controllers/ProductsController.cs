@@ -23,6 +23,7 @@ namespace ECommerce.Api.Controllers
         }
 
 
+
         [HttpGet]
         public async Task<IActionResult> GetProducts([FromQuery] ProductQueryParameters query)
         {
