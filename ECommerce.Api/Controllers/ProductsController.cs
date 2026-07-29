@@ -3,6 +3,7 @@ using ECommerce.Api.Data;
 using ECommerce.Api.DTOs;
 using ECommerce.Api.Models;
 using ECommerce.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,6 +54,7 @@ namespace ECommerce.Api.Controllers
         }
 
 
+        [Authorize]
         [HttpPost]
         public  async Task<IActionResult> CreateProduct(CreateProductDto dto)
         {
@@ -65,7 +67,7 @@ namespace ECommerce.Api.Controllers
 
 
 
-
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(int id, CreateProductDto dto)
         {
@@ -79,6 +81,7 @@ namespace ECommerce.Api.Controllers
 
 
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
