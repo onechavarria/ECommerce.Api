@@ -23,6 +23,14 @@ namespace ECommerce.Api.Models
         [Range(0, int.MaxValue)]
         public int Stock {  get; set; }
         
-        public DateTime CreatedAd { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = new DateTime(
+                DateTime.UtcNow.Year,
+                DateTime.UtcNow.Month,
+                DateTime.UtcNow.Day,
+                DateTime.UtcNow.Hour,
+                DateTime.UtcNow.Minute,
+                DateTime.UtcNow.Second,
+                DateTimeKind.Utc
+        );
     }
 }
