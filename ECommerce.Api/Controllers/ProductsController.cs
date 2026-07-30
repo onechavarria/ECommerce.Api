@@ -54,7 +54,7 @@ namespace ECommerce.Api.Controllers
         }
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public  async Task<IActionResult> CreateProduct(CreateProductDto dto)
         {
@@ -67,7 +67,7 @@ namespace ECommerce.Api.Controllers
 
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(int id, CreateProductDto dto)
         {
@@ -81,7 +81,7 @@ namespace ECommerce.Api.Controllers
 
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
